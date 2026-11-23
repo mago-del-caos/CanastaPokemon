@@ -1,0 +1,248 @@
+/* Canasta Llena de Pokemones — identidad del banner: cielo azul que
+   baja a naranja cálido, azul #2A75BB y amarillo #FFCB05. */
+:root {
+  --azul: #2A75BB;
+  --azul-oscuro: #1B4F82;
+  --amarillo: #FFCB05;
+  --crema: #FFF8E7;
+  --tinta: #22303C;
+  --rojo: #C1272D;
+  --verde: #2E7D32;
+  --radio: 14px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--tinta);
+  background: linear-gradient(180deg, #79C4F2 0%, #BFE3F7 34%, #FDEBC8 68%, #FFB35C 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+.pantalla {
+  display: none;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 16px 14px 32px;
+}
+.pantalla.activa { display: block; }
+.oculto { display: none !important; }
+
+h1 { font-size: 1.7rem; line-height: 1.15; margin: 14px 0 6px; color: var(--azul-oscuro); }
+h2 { font-size: 1.4rem; margin: 8px 0 10px; color: var(--azul-oscuro); }
+h3 { font-size: 1.05rem; margin: 16px 0 4px; color: var(--azul-oscuro); }
+.subtitulo { font-size: 1rem; line-height: 1.45; margin: 0 0 14px; }
+.banner {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radio);
+  border: 3px solid var(--amarillo);
+}
+.botones-inicio { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.btn {
+  font: inherit;
+  font-weight: 700;
+  border: 2px solid var(--azul-oscuro);
+  border-radius: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+  background: #fff;
+  color: var(--azul-oscuro);
+  min-height: 48px;
+}
+.btn.principal { background: var(--amarillo); border-color: #C79A00; color: #3A2E00; }
+.btn.secundario { background: rgba(255,255,255,.88); }
+.btn.chico { padding: 7px 10px; min-height: 38px; font-size: .85rem; border-radius: 9px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.peligro { border-color: var(--rojo); color: var(--rojo); }
+.historial { font-weight: 600; color: var(--azul-oscuro); }
+.creditos { font-size: .78rem; line-height: 1.4; opacity: .75; margin-top: 22px; }
+.aviso {
+  background: var(--crema);
+  border: 2px solid var(--amarillo);
+  border-radius: var(--radio);
+  padding: 10px 12px;
+  line-height: 1.45;
+}
+.reglas {
+  background: rgba(255,255,255,.9);
+  border-radius: var(--radio);
+  padding: 6px 16px 14px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.reglas ul { padding-left: 20px; margin: 6px 0; }
+
+/* ---------- Marcador y zonas ---------- */
+.marcador {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  background: var(--azul);
+  color: #fff;
+  border-radius: var(--radio);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+.marcador-datos { display: flex; flex-direction: column; }
+#marcador-puntos { font-weight: 800; font-size: 1.05rem; }
+.marcador-menor { font-size: .8rem; opacity: .9; }
+.marcador .btn { background: #fff; }
+.etiqueta-zona { font-weight: 700; font-size: .88rem; color: var(--azul-oscuro); margin: 8px 2px 6px; }
+.ayuda-seleccion { font-weight: 400; font-size: .78rem; opacity: .8; }
+.tres-rojos { color: var(--rojo); font-weight: 700; }
+.zona-rival, .zona-propia, .zona-mano {
+  background: rgba(255,255,255,.55);
+  border-radius: var(--radio);
+  padding: 6px 10px 10px;
+  margin-bottom: 10px;
+}
+.dorsos { display: flex; }
+.dorsos .carta { margin-right: -26px; }
+
+/* ---------- Cartas ---------- */
+.carta {
+  position: relative;
+  width: 62px; height: 88px;
+  background: #fff;
+  border: 1.5px solid #9db6c6;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.carta .esquina {
+  position: absolute; top: 2px; left: 4px;
+  font-weight: 800; font-size: .82rem; line-height: 1.05;
+  text-align: center;
+}
+.carta.roja .esquina { color: var(--rojo); }
+.carta .arte {
+  position: absolute; left: 50%; top: 46%;
+  transform: translate(-50%, -50%);
+  width: 44px; height: 44px; object-fit: contain;
+  pointer-events: none;
+}
+.carta .nombre {
+  position: absolute; left: 0; right: 0; bottom: 2px;
+  font-size: .5rem; font-weight: 700; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 0 2px;
+}
+.carta .valor {
+  position: absolute; top: 2px; right: 3px;
+  font-size: .55rem; font-weight: 700;
+  background: var(--crema); border: 1px solid #d8c88f;
+  border-radius: 6px; padding: 0 3px;
+}
+.carta.comodin { background: #FDF3FF; border-color: #B07CC6; }
+.carta.dorso {
+  background:
+    radial-gradient(circle at 50% 50%, #fff 0 9px, #22303C 10px 13px, transparent 14px),
+    linear-gradient(180deg, #D53B3B 0 46%, #22303C 46% 54%, #F4F4F4 54% 100%);
+  border-color: var(--azul-oscuro);
+}
+.carta.cruzada { transform: rotate(90deg); }
+.carta.seleccionada {
+  transform: translateY(-14px);
+  border-color: var(--azul);
+  box-shadow: 0 4px 10px rgba(27,79,130,.45);
+  z-index: 5;
+}
+.carta.mini { width: 40px; height: 57px; border-radius: 6px; }
+.carta.mini .arte { width: 28px; height: 28px; }
+.carta.mini .esquina { font-size: .62rem; }
+.carta.mini .nombre, .carta.mini .valor { display: none; }
+.carta.vacia {
+  background: rgba(255,255,255,.35);
+  border: 1.5px dashed #7d99ad;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .62rem; font-weight: 700; color: var(--azul-oscuro); text-align: center;
+}
+
+/* ---------- Fusiones ---------- */
+.fusiones { display: flex; flex-wrap: wrap; gap: 8px; min-height: 10px; }
+.fusion {
+  background: rgba(255,255,255,.85);
+  border: 1.5px solid #9db6c6;
+  border-radius: 10px;
+  padding: 5px 7px 6px;
+}
+.fusion .cartas { display: flex; }
+.fusion .cartas .carta { margin-right: -24px; }
+.fusion .cartas .carta:last-child { margin-right: 0; }
+.fusion .fusion-pie { font-size: .68rem; font-weight: 700; margin-top: 3px; color: var(--azul-oscuro); }
+.fusion.canasta { border-color: #C79A00; background: #FFF6D8; }
+.fusion.canasta .fusion-pie { color: #7A5C00; }
+.fusion.tocable { cursor: pointer; }
+.sin-fusiones { font-size: .82rem; opacity: .7; padding: 4px 2px; }
+
+/* ---------- Centro: mazo y pozo ---------- */
+.zona-centro { margin-bottom: 10px; }
+.pilas { display: flex; gap: 18px; justify-content: center; }
+.pila { text-align: center; }
+.pila-pie { font-size: .8rem; font-weight: 700; color: var(--azul-oscuro); margin-top: 4px; }
+.pozo-estado { color: var(--rojo); }
+.mensaje {
+  min-height: 24px;
+  text-align: center;
+  font-weight: 700;
+  margin: 8px 0 2px;
+  color: var(--azul-oscuro);
+}
+.mensaje.error { color: var(--rojo); }
+.registro {
+  font-size: .8rem; line-height: 1.45;
+  background: rgba(255,255,255,.65);
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-height: 20px;
+}
+.registro div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Pendientes y acciones ---------- */
+.zona-pendiente {
+  background: #FFF6D8;
+  border: 1.5px dashed #C79A00;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: .85rem; line-height: 1.45;
+}
+.barra-acciones {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 4px 0 10px;
+}
+.barra-acciones .btn { flex: 1 1 46%; }
+.barra-acciones .btn.solo { flex: 1 1 100%; }
+
+/* ---------- Mano ---------- */
+.mano {
+  display: flex;
+  overflow-x: auto;
+  padding: 18px 4px 8px;
+  min-height: 112px;
+}
+.mano .carta { margin-right: -16px; cursor: pointer; }
+.mano .carta:last-child { margin-right: 0; }
+
+/* ---------- Fin de mano ---------- */
+table.desglose {
+  width: 100%; border-collapse: collapse;
+  background: rgba(255,255,255,.92);
+  border-radius: var(--radio);
+  overflow: hidden;
+  margin-bottom: 16px;
+  font-size: .95rem;
+}
+table.desglose th, table.desglose td { padding: 9px 10px; text-align: right; }
+table.desglose th:first-child, table.desglose td:first-child { text-align: left; }
+table.desglose thead th { background: var(--azul); color: #fff; }
+table.desglose tr.total td { font-weight: 800; border-top: 2px solid var(--azul); }
+table.desglose tr.acumulado td { font-weight: 700; color: var(--azul-oscuro); }
+
+@media (min-width: 480px) {
+  .carta { width: 68px; height: 96px; }
+  .mano .carta { margin-right: -12px; }
+}

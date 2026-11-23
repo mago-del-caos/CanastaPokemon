@@ -1,0 +1,267 @@
+{
+ "AS": {
+  "pokemon": "Mewtwo",
+  "idPokedex": 150,
+  "img": "assets/cartas/AS.png"
+ },
+ "AH": {
+  "pokemon": "Pikachu",
+  "idPokedex": 25,
+  "img": "assets/cartas/AH.png"
+ },
+ "AD": {
+  "pokemon": "Charizard",
+  "idPokedex": 6,
+  "img": "assets/cartas/AD.png"
+ },
+ "AC": {
+  "pokemon": "Mew",
+  "idPokedex": 151,
+  "img": "assets/cartas/AC.png"
+ },
+ "KS": {
+  "pokemon": "Dragonite",
+  "idPokedex": 149,
+  "img": "assets/cartas/KS.png"
+ },
+ "KH": {
+  "pokemon": "Arcanine",
+  "idPokedex": 59,
+  "img": "assets/cartas/KH.png"
+ },
+ "KD": {
+  "pokemon": "Gyarados",
+  "idPokedex": 130,
+  "img": "assets/cartas/KD.png"
+ },
+ "KC": {
+  "pokemon": "Snorlax",
+  "idPokedex": 143,
+  "img": "assets/cartas/KC.png"
+ },
+ "QS": {
+  "pokemon": "Espeon",
+  "idPokedex": 196,
+  "img": "assets/cartas/QS.png"
+ },
+ "QH": {
+  "pokemon": "Ninetales",
+  "idPokedex": 38,
+  "img": "assets/cartas/QH.png"
+ },
+ "QD": {
+  "pokemon": "Lapras",
+  "idPokedex": 131,
+  "img": "assets/cartas/QD.png"
+ },
+ "QC": {
+  "pokemon": "Umbreon",
+  "idPokedex": 197,
+  "img": "assets/cartas/QC.png"
+ },
+ "JS": {
+  "pokemon": "Eevee",
+  "idPokedex": 133,
+  "img": "assets/cartas/JS.png"
+ },
+ "JH": {
+  "pokemon": "Jigglypuff",
+  "idPokedex": 39,
+  "img": "assets/cartas/JH.png"
+ },
+ "JD": {
+  "pokemon": "Togepi",
+  "idPokedex": 175,
+  "img": "assets/cartas/JD.png"
+ },
+ "JC": {
+  "pokemon": "Psyduck",
+  "idPokedex": 54,
+  "img": "assets/cartas/JC.png"
+ },
+ "10S": {
+  "pokemon": "Bulbasaur",
+  "idPokedex": 1,
+  "img": "assets/cartas/10S.png"
+ },
+ "10H": {
+  "pokemon": "Charmander",
+  "idPokedex": 4,
+  "img": "assets/cartas/10H.png"
+ },
+ "10D": {
+  "pokemon": "Squirtle",
+  "idPokedex": 7,
+  "img": "assets/cartas/10D.png"
+ },
+ "10C": {
+  "pokemon": "Chikorita",
+  "idPokedex": 152,
+  "img": "assets/cartas/10C.png"
+ },
+ "9S": {
+  "pokemon": "Ivysaur",
+  "idPokedex": 2,
+  "img": "assets/cartas/9S.png"
+ },
+ "9H": {
+  "pokemon": "Charmeleon",
+  "idPokedex": 5,
+  "img": "assets/cartas/9H.png"
+ },
+ "9D": {
+  "pokemon": "Wartortle",
+  "idPokedex": 8,
+  "img": "assets/cartas/9D.png"
+ },
+ "9C": {
+  "pokemon": "Cyndaquil",
+  "idPokedex": 155,
+  "img": "assets/cartas/9C.png"
+ },
+ "8S": {
+  "pokemon": "Venusaur",
+  "idPokedex": 3,
+  "img": "assets/cartas/8S.png"
+ },
+ "8H": {
+  "pokemon": "Blastoise",
+  "idPokedex": 9,
+  "img": "assets/cartas/8H.png"
+ },
+ "8D": {
+  "pokemon": "Totodile",
+  "idPokedex": 158,
+  "img": "assets/cartas/8D.png"
+ },
+ "8C": {
+  "pokemon": "Pidgeot",
+  "idPokedex": 18,
+  "img": "assets/cartas/8C.png"
+ },
+ "7S": {
+  "pokemon": "Raichu",
+  "idPokedex": 26,
+  "img": "assets/cartas/7S.png"
+ },
+ "7H": {
+  "pokemon": "Vulpix",
+  "idPokedex": 37,
+  "img": "assets/cartas/7H.png"
+ },
+ "7D": {
+  "pokemon": "Clefable",
+  "idPokedex": 36,
+  "img": "assets/cartas/7D.png"
+ },
+ "7C": {
+  "pokemon": "Wigglytuff",
+  "idPokedex": 40,
+  "img": "assets/cartas/7C.png"
+ },
+ "6S": {
+  "pokemon": "Meowth",
+  "idPokedex": 52,
+  "img": "assets/cartas/6S.png"
+ },
+ "6H": {
+  "pokemon": "Growlithe",
+  "idPokedex": 58,
+  "img": "assets/cartas/6H.png"
+ },
+ "6D": {
+  "pokemon": "Golduck",
+  "idPokedex": 55,
+  "img": "assets/cartas/6D.png"
+ },
+ "6C": {
+  "pokemon": "Alakazam",
+  "idPokedex": 65,
+  "img": "assets/cartas/6C.png"
+ },
+ "5S": {
+  "pokemon": "Gastly",
+  "idPokedex": 92,
+  "img": "assets/cartas/5S.png"
+ },
+ "5H": {
+  "pokemon": "Haunter",
+  "idPokedex": 93,
+  "img": "assets/cartas/5H.png"
+ },
+ "5D": {
+  "pokemon": "Gengar",
+  "idPokedex": 94,
+  "img": "assets/cartas/5D.png"
+ },
+ "5C": {
+  "pokemon": "Misdreavus",
+  "idPokedex": 200,
+  "img": "assets/cartas/5C.png"
+ },
+ "4S": {
+  "pokemon": "Caterpie",
+  "idPokedex": 10,
+  "img": "assets/cartas/4S.png"
+ },
+ "4H": {
+  "pokemon": "Pidgey",
+  "idPokedex": 16,
+  "img": "assets/cartas/4H.png"
+ },
+ "4D": {
+  "pokemon": "Weedle",
+  "idPokedex": 13,
+  "img": "assets/cartas/4D.png"
+ },
+ "4C": {
+  "pokemon": "Rattata",
+  "idPokedex": 19,
+  "img": "assets/cartas/4C.png"
+ },
+ "3S": {
+  "pokemon": "Magikarp",
+  "idPokedex": 129,
+  "img": "assets/cartas/3S.png"
+ },
+ "3H": {
+  "pokemon": "Zubat",
+  "idPokedex": 41,
+  "img": "assets/cartas/3H.png"
+ },
+ "3D": {
+  "pokemon": "Slowpoke",
+  "idPokedex": 79,
+  "img": "assets/cartas/3D.png"
+ },
+ "3C": {
+  "pokemon": "Geodude",
+  "idPokedex": 74,
+  "img": "assets/cartas/3C.png"
+ },
+ "2S": {
+  "pokemon": "Abra",
+  "idPokedex": 63,
+  "img": "assets/cartas/2S.png"
+ },
+ "2H": {
+  "pokemon": "Onix",
+  "idPokedex": 95,
+  "img": "assets/cartas/2H.png"
+ },
+ "2D": {
+  "pokemon": "Golem",
+  "idPokedex": 76,
+  "img": "assets/cartas/2D.png"
+ },
+ "2C": {
+  "pokemon": "Machamp",
+  "idPokedex": 68,
+  "img": "assets/cartas/2C.png"
+ },
+ "JOKER": {
+  "pokemon": "Ditto",
+  "idPokedex": 132,
+  "img": "assets/cartas/JOKER.png"
+ }
+}

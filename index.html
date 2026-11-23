@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canasta Llena de Pokemones — el juego de cartas clásico</title>
+<meta name="description" content="El juego de cartas Canasta clásico, con cartas Pokémon. Tú contra la CPU, a 5000 puntos. Funciona sin conexión.">
+<meta name="theme-color" content="#2A75BB">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Canasta Pokémon">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<!-- ============ INICIO ============ -->
+<section id="pantalla-inicio" class="pantalla activa">
+  <img class="banner" src="assets/banner.jpg" alt="Caja llena de Pokémon: Pikachu, Eevee, Bulbasaur, Charmander, Squirtle y más Pokémon saliendo de una caja con cartas">
+  <h1>Canasta llena de pokemones</h1>
+  <p class="subtitulo">El juego de cartas clásico de fusiones y canastas, con cartas Pokémon. Tú contra la CPU, en partidos a 5000 puntos.</p>
+  <div class="botones-inicio">
+    <button id="btn-jugar" class="btn principal">Jugar partida nueva</button>
+    <button id="btn-continuar" class="btn secundario oculto">Continuar la partida guardada</button>
+    <button id="btn-reglas" class="btn secundario">Cómo jugar</button>
+    <button id="btn-instalar" class="btn secundario oculto">Instalar la app</button>
+  </div>
+  <p id="historial" class="historial"></p>
+  <div id="ios-instalar" class="aviso oculto">
+    Para instalarla en iPhone: toca <strong>Compartir</strong> y luego <strong>«Agregar a pantalla de inicio»</strong>.
+  </div>
+  <p class="creditos">Proyecto de fans sin fines de lucro. Pokémon y los nombres de los personajes son marcas de Nintendo, Creatures Inc. y Game Freak Inc. Datos y arte vía PokéAPI.</p>
+</section>
+
+<!-- ============ REGLAS ============ -->
+<section id="pantalla-reglas" class="pantalla">
+  <h2>Cómo jugar a la Canasta</h2>
+  <div class="reglas">
+    <h3>El objetivo</h3>
+    <p>Gana el partido quien llegue primero a <strong>5000 puntos</strong> al cierre de una mano. Se juega con 108 cartas (dos barajas con comodines) y cada carta lleva un Pokémon; el comodín es Ditto.</p>
+    <h3>El turno</h3>
+    <p>En tu turno: <strong>roba 2 cartas</strong> del mazo o <strong>toma todo el pozo</strong>; después puedes fusionar y al final <strong>descartas 1 carta</strong>.</p>
+    <h3>Fusiones y canastas</h3>
+    <p>Una fusión son 3 a 7 cartas del mismo valor. Los comodines (Ditto y todos los 2) pueden ayudar, pero nunca pueden ser más que las cartas naturales. Una fusión de 7 es una <strong>canasta</strong>: natural (sin comodines) vale <strong>500</strong>, mixta <strong>300</strong> y la de puros comodines <strong>2000</strong>.</p>
+    <h3>Valores de las cartas</h3>
+    <ul>
+      <li>Comodín (Ditto y 2): 50 el comodín; el As y el 2 valen 20 como carta.</li>
+      <li>K, Q, J, 10, 9 y 8: 10 puntos.</li>
+      <li>7, 6, 5, 4 y 3 negro: 5 puntos.</li>
+      <li>3 rojo: carta bonus, vale 100 (ver abajo).</li>
+    </ul>
+    <h3>Fusión inicial</h3>
+    <p>La primera fusión de cada mano debe sumar un mínimo según tu puntaje del partido: si vas en negativo, 15; de 0 a 1495, <strong>50</strong>; de 1500 a 2995, <strong>90</strong>; con 3000 o más, <strong>120</strong>.</p>
+    <h3>El pozo y su congelación</h3>
+    <p>Para tomar el pozo necesitas empatar su carta superior: con una pareja natural de ese valor; o, si el pozo no está congelado para ti, con una carta natural más un comodín, o si la carta encaja en una fusión que ya tienes en la mesa. El pozo está <strong>congelado</strong> para ti mientras no hayas hecho tu fusión inicial, y se congela para todos cuando alguien descarta un comodín: congelado, solo se toma con pareja natural. Un <strong>3 negro</strong> arriba del pozo lo bloquea por un turno.</p>
+    <h3>Los treses</h3>
+    <p>Los <strong>3 rojos</strong> se apartan en cuanto llegan a tu mano y robas su repuesto: al final de la mano valen <strong>+100</strong> cada uno si hiciste al menos una fusión, y <strong>−100</strong> si no fusionaste nada. Los <strong>3 negros</strong> no se fusionan, salvo como grupo de 3 o 4 en el turno en que sales.</p>
+    <h3>Salir</h3>
+    <p>Para salir (quedarte sin cartas) necesitas al menos <strong>una canasta</strong>. Salir vale <strong>100</strong> puntos; si sales en un solo turno sin haber fusionado antes en toda la mano (salida oculta), vale <strong>200</strong>. Al salir, el rival resta el valor de las cartas que le queden en la mano. Si el mazo se agota y quien debe robar no toma el pozo, la mano termina y se puntúa igual, sin bonus de salida.</p>
+  </div>
+  <button id="btn-volver-inicio" class="btn principal">Volver</button>
+</section>
+
+<!-- ============ JUEGO ============ -->
+<section id="pantalla-juego" class="pantalla">
+  <header class="marcador">
+    <div class="marcador-datos">
+      <span id="marcador-puntos">Tú 0 · CPU 0</span>
+      <span id="marcador-mano" class="marcador-menor">Mano 1</span>
+      <span id="marcador-minimo" class="marcador-menor"></span>
+    </div>
+    <button id="btn-abandonar" class="btn chico">Abandonar</button>
+  </header>
+
+  <div class="zona-rival">
+    <div class="etiqueta-zona">CPU · <span id="cpu-cartas">11 cartas</span> <span id="cpu-tres" class="tres-rojos"></span></div>
+    <div id="cpu-dorsos" class="dorsos"></div>
+    <div id="cpu-fusiones" class="fusiones"></div>
+  </div>
+
+  <div class="zona-centro">
+    <div class="pilas">
+      <div class="pila">
+        <div id="mazo-vista"></div>
+        <div class="pila-pie">Mazo · <span id="mazo-num">0</span></div>
+      </div>
+      <div class="pila">
+        <div id="pozo-vista"></div>
+        <div class="pila-pie">Pozo · <span id="pozo-num">0</span> <span id="pozo-estado" class="pozo-estado"></span></div>
+      </div>
+    </div>
+    <div id="mensaje" class="mensaje" role="status"></div>
+    <div id="registro" class="registro"></div>
+  </div>
+
+  <div class="zona-propia">
+    <div class="etiqueta-zona">Tus fusiones <span id="tu-tres" class="tres-rojos"></span></div>
+    <div id="mis-fusiones" class="fusiones"></div>
+    <div id="zona-pendiente" class="zona-pendiente oculto"></div>
+  </div>
+
+  <div id="barra-acciones" class="barra-acciones"></div>
+
+  <div class="zona-mano">
+    <div class="etiqueta-zona">Tu mano · <span id="mano-num">0</span> cartas <span class="ayuda-seleccion">(toca cartas para seleccionarlas)</span></div>
+    <div id="mano" class="mano"></div>
+  </div>
+</section>
+
+<!-- ============ FIN DE MANO ============ -->
+<section id="pantalla-fin-mano" class="pantalla">
+  <h2 id="fin-mano-titulo">Fin de la mano</h2>
+  <p id="fin-mano-detalle" class="subtitulo"></p>
+  <div id="fin-mano-tabla"></div>
+  <button id="btn-siguiente-mano" class="btn principal">Siguiente mano</button>
+</section>
+
+<!-- ============ FIN DE PARTIDO ============ -->
+<section id="pantalla-fin-partido" class="pantalla">
+  <h2 id="fin-partido-titulo">Fin del partido</h2>
+  <p id="fin-partido-detalle" class="subtitulo"></p>
+  <div class="botones-inicio">
+    <button id="btn-otra-partida" class="btn principal">Jugar otra partida</button>
+    <button id="btn-ir-inicio" class="btn secundario">Volver al inicio</button>
+  </div>
+</section>
+
+<script src="canasta.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>
