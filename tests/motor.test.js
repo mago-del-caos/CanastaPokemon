@@ -367,6 +367,104 @@ prueba('Mazo agotado sin tomar el pozo: la mano termina sin bonus de salida', ()
   assert.strictEqual(e.resultado.desglose[1].salida, 0);
 });
 
+// ---------- Niveles de dificultad y pista ----------
+prueba('Nivel fácil: la CPU nunca toma el pozo aunque pueda y le convenga', () => {
+  // Pozo grande (6 cartas) con pareja natural en mano: en normal/difícil
+  // la CPU lo tomaría; en fácil debe robar del mazo.
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['4C'], ['7S', '7H', '9S', '9H', '9D', 'KC', 'QD']],
+    pozo: ['5S', '6S', '8S', '10S', 'QS', '7D'],
+    mazo: ['AS', 'AH', 'AD', 'AC', 'KS', 'KH'],
+    fusionado: [false, true], turno: 1, fase: 'robar'
+  });
+  const rng = C.crearRng(5);
+  const r = C.cpuTurnoConNivel(e, rng, 'facil');
+  assert(r.ok, r.error);
+  // El pozo original (6 cartas) sigue completo bajo el descarte de la CPU:
+  // solo creció en 1 (su descarte), no lo tomó.
+  assert.strictEqual(e.pile.length, 7, 'el pozo debió conservarse y crecer solo con el descarte');
+  assert.strictEqual(C.codigoCarta(e.pile[5]), '7D', 'la carta superior original sigue en el pozo');
+});
+
+prueba('Niveles normal y difícil completan turnos legales con invariantes', () => {
+  for (const nivel of ['normal', 'dificil']) {
+    const partida = C.crearPartida();
+    const rng = C.crearRng(77);
+    let e = C.nuevaMano(partida, rng);
+    let guardia = 0;
+    while (e.phase !== 'fin' && guardia++ < 500) {
+      const r = C.cpuTurnoConNivel(e, rng, nivel);
+      assert(r.ok, nivel + ': ' + r.error);
+      assert.deepStrictEqual(C.validarInvariantes(e), []);
+    }
+    assert.strictEqual(e.phase, 'fin', nivel + ': la mano no terminó');
+  }
+});
+
+prueba('Pista en fase de robo: sugiere tomar un pozo que compensa', () => {
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['7S', '7H', '9S', 'KC', 'QD', '4S'], ['4C']],
+    pozo: ['5S', '6S', '8S', '10S', 'QS', '7D'],
+    mazo: ['AS', 'AH'],
+    fusionado: [true, false], turno: 0, fase: 'robar'
+  });
+  const s = C.sugerirJugada(e, 0);
+  assert.strictEqual(s.tipo, 'tomar-pozo');
+  assert.strictEqual(s.ids.length, 2);
+  // La jugada sugerida es legal de verdad:
+  const r = C.tomarPozo(e, { tipo: s.opcion });
+  assert(r.ok, r.error);
+});
+
+prueba('Pista en fase de robo: con pozo pobre sugiere robar del mazo', () => {
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['9S', 'KC', 'QD', '4S'], ['4C']],
+    pozo: ['7D'], mazo: ['AS', 'AH'],
+    fusionado: [true, false], turno: 0, fase: 'robar'
+  });
+  const s = C.sugerirJugada(e, 0);
+  assert.strictEqual(s.tipo, 'robar');
+  assert.strictEqual(s.ids.length, 0);
+});
+
+prueba('Pista de fusión inicial: propone grupos que el motor acepta', () => {
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['AS', 'AH', 'AD', 'KS', 'KH', 'KD', '9C', '4S'], ['4C']],
+    mazo: ['5S'], fase: 'jugar', puntajesPrevios: [0, 0]
+  });
+  const s = C.sugerirJugada(e, 0);
+  assert.strictEqual(s.tipo, 'fusion-inicial');
+  const r = C.fusionInicial(e, s.grupos);
+  assert(r.ok, r.error);
+});
+
+prueba('Pista de fusión: sugiere añadir a una fusión en mesa y el motor lo acepta', () => {
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['KS', 'KH', '9C', '4S'], ['4C']],
+    fusiones: { 0: { K: ['KD', 'KC', 'KS'] } },
+    fusionado: [true, false], fase: 'jugar'
+  });
+  const s = C.sugerirJugada(e, 0);
+  assert.strictEqual(s.tipo, 'fusionar');
+  assert.strictEqual(s.destino, 'K');
+  const r = C.fusionar(e, s.ids, s.destino);
+  assert(r.ok, r.error);
+});
+
+prueba('Pista sin fusiones posibles: sugiere un descarte que está en la mano', () => {
+  const e = C._debug.crearManoPersonalizada({
+    manos: [['9C', '4S', '6D', '8H'], ['4C']],
+    fusiones: { 0: { K: ['KS', 'KH', 'KD'] } },
+    fusionado: [true, false], fase: 'jugar'
+  });
+  const s = C.sugerirJugada(e, 0);
+  assert.strictEqual(s.tipo, 'descartar');
+  assert.strictEqual(s.ids.length, 1);
+  assert(e.players[0].hand.some(c => c.uid === s.ids[0]));
+  const r = C.descartar(e, s.ids[0]);
+  assert(r.ok, r.error);
+});
+
 // ---------- Partidas completas ----------
 prueba('Partidas completas CPU vs CPU hasta 5000 con invariantes (5 semillas)', () => {
   const resumenes = [];
@@ -379,6 +477,17 @@ prueba('Partidas completas CPU vs CPU hasta 5000 con invariantes (5 semillas)', 
   const totManos = resumenes.reduce((s, r) => s + r.manos, 0);
   const totTurnos = resumenes.reduce((s, r) => s + r.turnosTotales, 0);
   console.log('        CPU vs CPU: 5 partidos, ' + totManos + ' manos, ' + totTurnos + ' turnos verificados');
+});
+
+prueba('Partidas completas con niveles mezclados (fácil vs difícil) terminan', () => {
+  for (const semilla of [11, 222]) {
+    const r = jugarPartida(semilla, (e, rng) => {
+      const nivel = e.turn === 0 ? 'facil' : 'dificil';
+      const res = C.cpuTurnoConNivel(e, rng, nivel);
+      assert(res.ok, 'cpuTurnoConNivel ' + nivel + ' falló: ' + res.error);
+    }, 'Niveles semilla ' + semilla);
+    assert(r.manos >= 1);
+  }
 });
 
 prueba('Partidas con movimientos aleatorios legales (3 semillas)', () => {
