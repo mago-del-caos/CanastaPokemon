@@ -21,13 +21,23 @@
   <img class="banner" src="assets/banner.jpg" alt="Caja llena de Pokémon: Pikachu, Eevee, Bulbasaur, Charmander, Squirtle y más Pokémon saliendo de una caja con cartas">
   <h1>Canasta llena de pokemones</h1>
   <p class="subtitulo">El juego de cartas clásico de fusiones y canastas, con cartas Pokémon. Tú contra la CPU, en partidos a 5000 puntos.</p>
+  <div class="dificultad">
+    <span class="dificultad-etiqueta" id="etiqueta-dificultad">Dificultad de la CPU</span>
+    <div class="segmentado" role="group" aria-labelledby="etiqueta-dificultad">
+      <button class="seg" data-dificultad="facil">Fácil</button>
+      <button class="seg" data-dificultad="normal">Normal</button>
+      <button class="seg" data-dificultad="dificil">Difícil</button>
+    </div>
+  </div>
   <div class="botones-inicio">
     <button id="btn-jugar" class="btn principal">Jugar partida nueva</button>
     <button id="btn-continuar" class="btn secundario oculto">Continuar la partida guardada</button>
     <button id="btn-reglas" class="btn secundario">Cómo jugar</button>
+    <button id="btn-ajustes" class="btn secundario">Ajustes</button>
     <button id="btn-instalar" class="btn secundario oculto">Instalar la app</button>
   </div>
   <p id="historial" class="historial"></p>
+  <p id="estadisticas" class="historial"></p>
   <div id="ios-instalar" class="aviso oculto">
     Para instalarla en iPhone: toca <strong>Compartir</strong> y luego <strong>«Agregar a pantalla de inicio»</strong>.
   </div>
@@ -63,6 +73,30 @@
   <button id="btn-volver-inicio" class="btn principal">Volver</button>
 </section>
 
+<!-- ============ AJUSTES ============ -->
+<section id="pantalla-ajustes" class="pantalla">
+  <h2>Ajustes</h2>
+  <div class="ajustes">
+    <div class="ajuste">
+      <span class="ajuste-etiqueta" id="etiqueta-sonido">Efectos de sonido</span>
+      <div class="segmentado" role="group" aria-labelledby="etiqueta-sonido">
+        <button class="seg" data-sonido="si">Sí</button>
+        <button class="seg" data-sonido="no">No</button>
+      </div>
+    </div>
+    <div class="ajuste">
+      <span class="ajuste-etiqueta" id="etiqueta-velocidad">Velocidad de la CPU</span>
+      <div class="segmentado" role="group" aria-labelledby="etiqueta-velocidad">
+        <button class="seg" data-velocidad="lenta">Lenta</button>
+        <button class="seg" data-velocidad="normal">Normal</button>
+        <button class="seg" data-velocidad="rapida">Rápida</button>
+      </div>
+      <p class="ajuste-nota">La velocidad solo cambia cuánto tarda la CPU en jugar su turno, no cómo juega.</p>
+    </div>
+  </div>
+  <button id="btn-volver-ajustes" class="btn principal">Volver</button>
+</section>
+
 <!-- ============ JUEGO ============ -->
 <section id="pantalla-juego" class="pantalla">
   <header class="marcador">
@@ -71,8 +105,12 @@
       <span id="marcador-mano" class="marcador-menor">Mano 1</span>
       <span id="marcador-minimo" class="marcador-menor"></span>
     </div>
-    <button id="btn-abandonar" class="btn chico">Abandonar</button>
+    <div class="marcador-botones">
+      <button id="btn-sonido" class="btn chico" aria-pressed="true">Sonido: sí</button>
+      <button id="btn-abandonar" class="btn chico">Abandonar</button>
+    </div>
   </header>
+  <div id="aviso-salir" class="aviso-salir oculto">Ya tienes una canasta: puedes salir cuando quieras.</div>
 
   <div class="zona-rival">
     <div class="etiqueta-zona">CPU · <span id="cpu-cartas">11 cartas</span> <span id="cpu-tres" class="tres-rojos"></span></div>
@@ -104,7 +142,12 @@
   <div id="barra-acciones" class="barra-acciones"></div>
 
   <div class="zona-mano">
-    <div class="etiqueta-zona">Tu mano · <span id="mano-num">0</span> cartas <span class="ayuda-seleccion">(toca cartas para seleccionarlas)</span></div>
+    <div class="etiqueta-zona">Tu mano · <span id="mano-num">0</span> cartas <span class="ayuda-seleccion">(toca cartas para seleccionarlas)</span>
+      <span class="orden-mano">Ordenar:
+        <button id="btn-orden-valor" class="btn chico orden activo">Por valor</button>
+        <button id="btn-orden-palo" class="btn chico orden">Por palo</button>
+      </span>
+    </div>
     <div id="mano" class="mano"></div>
   </div>
 </section>
@@ -114,6 +157,8 @@
   <h2 id="fin-mano-titulo">Fin de la mano</h2>
   <p id="fin-mano-detalle" class="subtitulo"></p>
   <div id="fin-mano-tabla"></div>
+  <h3>Puntajes mano a mano</h3>
+  <div id="fin-mano-historial"></div>
   <button id="btn-siguiente-mano" class="btn principal">Siguiente mano</button>
 </section>
 
@@ -121,6 +166,7 @@
 <section id="pantalla-fin-partido" class="pantalla">
   <h2 id="fin-partido-titulo">Fin del partido</h2>
   <p id="fin-partido-detalle" class="subtitulo"></p>
+  <p id="fin-partido-estadisticas" class="historial"></p>
   <div class="botones-inicio">
     <button id="btn-otra-partida" class="btn principal">Jugar otra partida</button>
     <button id="btn-ir-inicio" class="btn secundario">Volver al inicio</button>

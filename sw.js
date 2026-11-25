@@ -1,9 +1,9 @@
 /*
  * sw.js — Service worker de Canasta Llena de Pokemones.
- * Precarga TODO lo local (canasta-v1) y sirve cache-first: tras la
+ * Precarga TODO lo local (canasta-v2) y sirve cache-first: tras la
  * primera carga, la app no necesita red para nada.
  */
-var CACHE = 'canasta-v1';
+var CACHE = 'canasta-v2';
 var RECURSOS = [
  "./",
  "index.html",

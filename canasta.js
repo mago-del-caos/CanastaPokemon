@@ -727,7 +727,9 @@
   }
 
   // ---------------- CPU ----------------
-  function cpuFusionar(estado, rng) {
+  // simple=true degrada las fusiones (nivel Fácil): no cierra canastas
+  // con comodín, no fusiona pareja + comodín ni acumula comodines.
+  function cpuFusionar(estado, rng, simple) {
     var idx = estado.turn, jugador = estado.players[idx];
     var minimo = minimoInicial(estado.puntajesPrevios[idx]);
     var i, r;
@@ -771,7 +773,7 @@
         var ids = [];
         while (disp.length && fusion.length + ids.length < 7) ids.push(disp.shift().uid);
         // Si con un comodín se cierra la canasta y la proporción lo permite, úsalo.
-        if (fusion.length + ids.length === 6 && g.comodines.length) {
+        if (!simple && fusion.length + ids.length === 6 && g.comodines.length) {
           var natsF = fusion.filter(esNatural).length + ids.length;
           var comsF = fusion.filter(esComodin).length;
           if (comsF + 1 <= natsF) ids.push(g.comodines[0].uid);
@@ -793,6 +795,7 @@
       }
       if (huboCambio) continue;
       // 3) Pareja + comodín si sobran comodines.
+      if (simple) break;
       for (i = 0; i < rangos.length; i++) {
         var ns2 = g.naturales[rangos[i]];
         if (ns2.length === 2 && g.comodines.length >= 2 && !jugador.melds[rangos[i]]) {
@@ -802,7 +805,7 @@
       }
       if (huboCambio) continue;
       // 4) Muchos comodines acumulados: fusionarlos (valen más en mesa que en mano al cierre).
-      if (g.comodines.length >= 5) {
+      if (!simple && g.comodines.length >= 5) {
         r = fusionar(estado, g.comodines.slice(0, 7).map(function (c) { return c.uid; }), 'WILD');
         if (r.ok) huboCambio = true;
         if (estado.phase === 'fin') return;
@@ -840,14 +843,19 @@
     return mejor;
   }
 
-  function cpuTurno(estado, rng) {
+  // Núcleo del turno de la CPU. opc ajusta la fuerza según el nivel:
+  // sinPozo (nunca toma el pozo), minCartasPozo/minValorPozo (codicia),
+  // fusionSimple (fusiones degradadas), rngDescarte (ruido al descartar).
+  function cpuTurnoBase(estado, rng, opc) {
+    opc = opc || {};
     if (estado.phase !== 'robar') return error('No es el turno de robar de la CPU.');
     var idx = estado.turn, jugador = estado.players[idx];
     var info = puedeRobarPozo(estado, idx);
     var tomo = false;
-    if (info.puede) {
+    if (info.puede && !opc.sinPozo) {
       var valorPozo = puntosDeCartas(estado.pile);
-      var quiere = estado.pile.length >= 4 || valorPozo >= 50 ||
+      var quiere = estado.pile.length >= (opc.minCartasPozo || 4) ||
+        valorPozo >= (opc.minValorPozo || 50) ||
         (!estado.stock.length && (estado.pile.length >= 3 || valorPozo >= 40));
       if (quiere) {
         var orden = ['pareja', 'fusion', 'naturalComodin'];
@@ -882,11 +890,157 @@
       if (resR.finDeMano) return resR;
     }
     if (estado.phase !== 'jugar') return { ok: true };
-    cpuFusionar(estado, rng);
+    cpuFusionar(estado, rng, !!opc.fusionSimple);
     if (estado.phase === 'fin') return { ok: true, salio: true };
-    var descarte = cpuElegirDescarte(estado, rng);
+    var descarte = cpuElegirDescarte(estado, opc.rngDescarte || rng);
     if (!descarte) return error('La CPU no encontró descarte.');
     return descartar(estado, descarte.uid);
+  }
+
+  function cpuTurno(estado, rng) { return cpuTurnoBase(estado, rng, null); }
+
+  // Turno de la CPU con nivel de dificultad: 'facil' | 'normal' | 'dificil'.
+  // No cambia ninguna regla: solo la calidad de las decisiones.
+  //  - facil: nunca toma el pozo, fusiona de forma simple y descarta con
+  //    mucho ruido (a veces rompe parejas o suelta un comodín: no congela
+  //    a propósito ni se guarda nada).
+  //  - normal: la heurística de siempre.
+  //  - dificil: toma el pozo antes, fusiona completo y descarta su mejor
+  //    carta según la heurística, sin ruido.
+  function cpuTurnoConNivel(estado, rng, nivel) {
+    if (nivel === 'facil') {
+      return cpuTurnoBase(estado, rng, {
+        sinPozo: true,
+        fusionSimple: true,
+        rngDescarte: function () { return rng() * 5; }
+      });
+    }
+    if (nivel === 'dificil') {
+      return cpuTurnoBase(estado, rng, {
+        minCartasPozo: 3,
+        minValorPozo: 40,
+        rngDescarte: function () { return 0; }
+      });
+    }
+    return cpuTurnoBase(estado, rng, null);
+  }
+
+  // Sugiere una jugada legal razonable para el jugador en turno (botón
+  // «Pista» de la interfaz). No modifica el estado. Devuelve
+  // {tipo, ids, motivo} con tipo: 'robar' | 'tomar-pozo' | 'fusion-inicial'
+  // | 'fusionar' | 'descartar' | 'nada'. En 'fusion-inicial', `grupos`
+  // trae los grupos de ids; en 'fusionar', `destino` la clave de la fusión.
+  function sugerirJugada(estado, idx) {
+    var jugador = estado.players[idx];
+    var sinRuido = function () { return 0; };
+    if (estado.phase === 'fin' || estado.turn !== idx)
+      return { tipo: 'nada', ids: [], motivo: 'Ahora no hay jugada que sugerir.' };
+    if (estado.phase === 'robar') {
+      var info = puedeRobarPozo(estado, idx);
+      if (info.puede) {
+        var valorPozo = puntosDeCartas(estado.pile);
+        if (estado.pile.length >= 4 || valorPozo >= 50) {
+          var pref = info.opciones.filter(function (o) { return o.tipo === 'pareja'; })[0] ||
+            info.opciones[0];
+          return {
+            tipo: 'tomar-pozo', ids: pref.ids.slice(), opcion: pref.tipo,
+            motivo: 'El pozo tiene ' + estado.pile.length + ' cartas (' + valorPozo +
+              ' puntos en cartas): conviene tomarlo.'
+          };
+        }
+      }
+      return { tipo: 'robar', ids: [], motivo: 'Roba 2 del mazo: el pozo no compensa este turno.' };
+    }
+    // Fase de jugar.
+    if (!jugador.hasMelded) {
+      var minimo = minimoInicial(estado.puntajesPrevios[idx]);
+      var grupos = buscarGruposIniciales(jugador.hand, minimo);
+      if (grupos) {
+        var idsT = [], puntosT = 0;
+        grupos.forEach(function (g) {
+          g.forEach(function (c) { idsT.push(c.uid); });
+          puntosT += puntosDeCartas(g);
+        });
+        return {
+          tipo: 'fusion-inicial', ids: idsT,
+          grupos: grupos.map(function (g) { return g.map(function (c) { return c.uid; }); }),
+          motivo: 'Puedes hacer tu fusión inicial con ' + puntosT + ' puntos (mínimo ' + minimo + ').'
+        };
+      }
+      var d0 = cpuElegirDescarte(estado, sinRuido);
+      return {
+        tipo: 'descartar', ids: d0 ? [d0.uid] : [],
+        motivo: 'Aún no alcanzas la fusión inicial: descarta tu carta menos útil y sigue juntando.'
+      };
+    }
+    var g = agruparMano(jugador.hand);
+    var claves = Object.keys(jugador.melds);
+    var i, clave, fusion;
+    // 1) Añadir naturales a una fusión existente (mejor si cierra canasta).
+    for (i = 0; i < claves.length; i++) {
+      clave = claves[i];
+      if (clave === 'WILD' || clave === '3N') continue;
+      fusion = jugador.melds[clave];
+      if (!fusion || fusion.length >= 7) continue;
+      var disp = (g.naturales[clave] || []).slice(0, 7 - fusion.length);
+      if (disp.length) {
+        var cierra = fusion.length + disp.length === 7;
+        return {
+          tipo: 'fusionar', destino: clave,
+          ids: disp.map(function (c) { return c.uid; }),
+          motivo: cierra
+            ? 'Añade esas cartas a tu fusión de ' + clave + ' y cierras una canasta.'
+            : 'Añade esas cartas a tu fusión de ' + clave + ' ya en mesa.'
+        };
+      }
+    }
+    // 2) Cerrar una canasta con un comodín.
+    if (g.comodines.length) {
+      for (i = 0; i < claves.length; i++) {
+        clave = claves[i];
+        if (clave === 'WILD' || clave === '3N') continue;
+        fusion = jugador.melds[clave];
+        if (!fusion || fusion.length !== 6) continue;
+        var natsF = fusion.filter(esNatural).length;
+        var comsF = fusion.filter(esComodin).length;
+        if (comsF + 1 <= natsF) {
+          return {
+            tipo: 'fusionar', destino: clave, ids: [g.comodines[0].uid],
+            motivo: 'Con ese comodín cierras la canasta de ' + clave + '.'
+          };
+        }
+      }
+    }
+    // 3) Fusión nueva con 3+ naturales.
+    var rangos = Object.keys(g.naturales);
+    for (i = 0; i < rangos.length; i++) {
+      var ns = g.naturales[rangos[i]];
+      if (ns.length >= 3 && !jugador.melds[rangos[i]]) {
+        return {
+          tipo: 'fusionar', destino: rangos[i],
+          ids: ns.slice(0, 7).map(function (c) { return c.uid; }),
+          motivo: 'Tienes ' + ns.length + ' cartas del valor ' + rangos[i] + ': fusión nueva lista.'
+        };
+      }
+    }
+    // 4) Pareja + comodín.
+    if (g.comodines.length) {
+      for (i = 0; i < rangos.length; i++) {
+        var ns2 = g.naturales[rangos[i]];
+        if (ns2.length === 2 && !jugador.melds[rangos[i]]) {
+          return {
+            tipo: 'fusionar', destino: rangos[i],
+            ids: [ns2[0].uid, ns2[1].uid, g.comodines[0].uid],
+            motivo: 'Pareja de ' + rangos[i] + ' más un comodín: fusión nueva.'
+          };
+        }
+      }
+    }
+    var d1 = cpuElegirDescarte(estado, sinRuido);
+    return {
+      tipo: 'descartar', ids: d1 ? [d1.uid] : [],
+      motivo: 'Sin fusiones a la vista: descarta esa carta, la menos útil de tu mano.'
+    };
   }
 
   // ---------------- Utilidades para pruebas ----------------
@@ -940,7 +1094,8 @@
     contarCanastas: contarCanastas, tipoCanasta: tipoCanasta, bonusCanasta: bonusCanasta,
     cartasDeFusiones: cartasDeFusiones, validarInvariantes: validarInvariantes,
     agruparMano: agruparMano, buscarGruposIniciales: buscarGruposIniciales,
-    cpuTurno: cpuTurno,
+    cpuTurno: cpuTurno, cpuTurnoConNivel: cpuTurnoConNivel,
+    sugerirJugada: sugerirJugada,
     _debug: { crearManoPersonalizada: crearManoPersonalizada }
   };
 
